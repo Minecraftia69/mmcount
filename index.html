@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Countdown - 中考倒计时</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: white;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            z-index: 2;
+        }
+        
+        .header {
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
+            letter-spacing: 3px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        h1:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 2px;
+        }
+        
+        .subtitle {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .main-countdown {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .countdown-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .time-display {
+            font-size: 3.5rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            margin: 20px 0;
+            color: #ffeb3b;
+            text-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .time-unit {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 90px;
+            padding: 0 20px;
+        }
+        
+        .time-unit span {
+            display: inline-block;
+            width: 100px;
+            text-align: center;
+        }
+        
+        .additional-countdowns {
+            width: 100%;
+            margin-top: 30px;
+        }
+        
+        .additional-title {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            display: inline-block;
+        }
+        
+        .additional-title:after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 1.5px;
+        }
+        
+        .countdown-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .countdown-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, background 0.3s;
+        }
+        
+        .countdown-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .event-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: left;
+            flex: 1;
+        }
+        
+        .event-time {
+            font-size: 1.8rem;
+            font-family: 'Courier New', monospace;
+            color: #a5d6a7;
+            text-shadow: 0 0 5px rgba(165, 214, 167, 0.5);
+            flex: 2;
+            text-align: right;
+        }
+        
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-1000px) rotate(720deg); }
+        }
+        
+        .footer {
+            margin-top: 40px;
+            font-size: 1rem;
+            opacity: 0.8;
+            text-align: center;
+        }
+        
+        .loading {
+            font-size: 1.2rem;
+            color: #ffeb3b;
+            margin: 20px 0;
+        }
+        
+        .error {
+            color: #ff8a80;
+            background: rgba(255, 0, 0, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.8rem; }
+            .subtitle { font-size: 1.5rem; }
+            .countdown-title { font-size: 2rem; }
+            .time-display { font-size: 2.5rem; }
+            .time-unit { gap: 40px; }
+            .time-unit span { width: 60px; }
+            .countdown-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            .event-name, .event-time {
+                text-align: center;
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 { font-size: 2.2rem; }
+            .time-display { font-size: 1.8rem; }
+            .time-unit { gap: 25px; font-size: 1rem; }
+            .time-unit span { width: 50px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements" id="floatingElements"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>The Countdown</h1>
+            <div class="subtitle">距离 <span style="color:#ffeb3b; font-weight:bold;">中考</span> 还剩</div>
+        </div>
+        
+        <div class="main-countdown">
+            <div class="countdown-title">2026年中考</div>
+            <div id="countdown" class="time-display">加载中...</div>
+            <div class="time-unit">
+                <span>天</span>
+                <span>小时</span>
+                <span>分</span>
+                <span>秒</span>
+                <span>毫秒</span>
+            </div>
+        </div>
+        
+        <div class="additional-countdowns">
+            <h2 class="additional-title">其他倒计时</h2>
+            <div id="loading" class="loading">
+                <i class="fas fa-spinner fa-spin"></i> 正在加载更多倒计时...
+            </div>
+            <div id="countdown-list" class="countdown-list"></div>
+            <div id="error-message" class="error" style="display: none;"></div>
+        </div>
+        
+        <div class="footer">
+            <p>中考时间: 2026年6月17日 00:00:00 | 最后更新: <span id="update-time"></span></p>
+            <p>页面将自动更新，确保时间准确</p>
+        </div>
+    </div>
+
+    <script>
+        // 中考目标时间：2026年6月17日 00:00:00
+        const targetDate = new Date('2026-06-17T00:00:00').getTime();
+        
+        // 创建浮动背景元素
+        function createFloatingElements() {
+            const container = document.getElementById('floatingElements');
+            const elementCount = 20;
+            
+            for (let i = 0; i < elementCount; i++) {
+                const element = document.createElement('div');
+                element.classList.add('floating-element');
+                
+                // 随机大小和位置
+                const size = Math.random() * 60 + 20;
+                const left = Math.random() * 100;
+                const delay = Math.random() * 15;
+                const duration = Math.random() * 10 + 15;
+                
+                element.style.width = `${size}px`;
+                element.style.height = `${size}px`;
+                element.style.left = `${left}vw`;
+                element.style.animationDelay = `${delay}s`;
+                element.style.animationDuration = `${duration}s`;
+                
+                container.appendChild(element);
+            }
+        }
+        
+        // 更新中考倒计时
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const timeLeft = targetDate - now;
+            
+            // 如果时间已过
+            if (timeLeft < 0) {
+                document.getElementById('countdown').innerHTML = "中考已开始！";
+                return;
+            }
+            
+            // 计算天、时、分、秒、毫秒
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            const milliseconds = Math.floor((timeLeft % 1000) / 10);
+            
+            // 格式化显示
+            const formattedTime = 
+                `${days.toString().padStart(2, '0')}天` +
+                `${hours.toString().padStart(2, '0')}小时` +
+                `${minutes.toString().padStart(2, '0')}分` +
+                `${seconds.toString().padStart(2, '0')}秒` +
+                `.${milliseconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('countdown').innerHTML = formattedTime;
+            
+            // 更新最后刷新时间
+            const nowDate = new Date();
+            document.getElementById('update-time').textContent = 
+                `${nowDate.getFullYear()}/${nowDate.getMonth()+1}/${nowDate.getDate()} ` +
+                `${nowDate.getHours().toString().padStart(2, '0')}:${nowDate.getMinutes().toString().padStart(2, '0')}:${nowDate.getSeconds().toString().padStart(2, '0')}`;
+        }
+        
+        // 从文件加载更多倒计时
+        async function loadAdditionalCountdowns() {
+            const loadingElement = document.getElementById('loading');
+            const countdownList = document.getElementById('countdown-list');
+            const errorElement = document.getElementById('error-message');
+            
+            try {
+                // 尝试加载morectd.hypixel文件
+                const response = await fetch('morectd.hypixel');
+                
+                if (!response.ok) {
+                    throw new Error(`文件加载失败: ${response.status}`);
+                }
+                
+                const text = await response.text();
+                
+                // 隐藏加载提示
+                loadingElement.style.display = 'none';
+                
+                // 如果文件为空
+                if (!text.trim()) {
+                    countdownList.innerHTML = '<div class="countdown-item"><div class="event-name">暂无其他倒计时</div></div>';
+                    return;
+                }
+                
+                // 按行分割内容
+                const lines = text.trim().split('\n');
+                let validCountdowns = 0;
+                
+                // 清空列表
+                countdownList.innerHTML = '';
+                
+                // 处理每一行
+                lines.forEach((line, index) => {
+                    line = line.trim();
+                    if (!line) return;
+                    
+                    // 解析格式: 名称,yyyy-mm-dd-hh-mm-ss
+                    const parts = line.split(',');
+                    if (parts.length !== 2) {
+                        console.warn(`第${index+1}行格式错误: ${line}`);
+                        return;
+                    }
+                    
+                    const name = parts[0].trim();
+                    const dateTimeStr = parts[1].trim();
+                    
+                    // 解析日期时间
+                    const dateParts = dateTimeStr.split('-');
+                    if (dateParts.length !== 6) {
+                        console.warn(`第${index+1}行日期格式错误: ${dateTimeStr}`);
+                        return;
+                    }
+                    
+                    const [year, month, day, hour, minute, second] = dateParts.map(Number);
+                    const targetDate = new Date(year, month-1, day, hour, minute, second);
+                    
+                    // 检查日期是否有效
+                    if (isNaN(targetDate.getTime())) {
+                        console.warn(`第${index+1}行日期无效: ${dateTimeStr}`);
+                        return;
+                    }
+                    
+                    // 创建倒计时元素
+                    const countdownElement = document.createElement('div');
+                    countdownElement.className = 'countdown-item';
+                    countdownElement.id = `countdown-item-${index}`;
+                    
+                    countdownElement.innerHTML = `
+                        <div class="event-name">${name}</div>
+                        <div class="event-time" id="event-time-${index}">计算中...</div>
+                    `;
+                    
+                    countdownList.appendChild(countdownElement);
+                    validCountdowns++;
+                    
+                    // 为该倒计时设置更新函数
+                    setInterval(() => updateSingleCountdown(index, targetDate.getTime()), 50);
+                });
+                
+                if (validCountdowns === 0) {
+                    countdownList.innerHTML = '<div class="countdown-item"><div class="event-name">文件中没有有效的倒计时数据</div></div>';
+                }
+                
+            } catch (error) {
+                console.error('加载倒计时文件时出错:', error);
+                loadingElement.style.display = 'none';
+                errorElement.style.display = 'block';
+                errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> 无法加载更多倒计时: ${error.message}<br>请确保 morectd.hypixel 文件与页面在同一目录下`;
+            }
+        }
+        
+        // 更新单个倒计时
+        function updateSingleCountdown(index, targetTime) {
+            const now = new Date().getTime();
+            const timeLeft = targetTime - now;
+            const element = document.getElementById(`event-time-${index}`);
+            
+            if (!element) return;
+            
+            // 如果时间已过
+            if (timeLeft < 0) {
+                element.textContent = "已过时";
+                element.style.color = "#ff8a80";
+                return;
+            }
+            
+            // 计算时间差
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            const milliseconds = Math.floor((timeLeft % 1000) / 10);
+            
+            // 格式化显示
+            const formattedTime = 
+                `${days.toString().padStart(2, '0')}天` +
+                `${hours.toString().padStart(2, '0')}小时` +
+                `${minutes.toString().padStart(2, '0')}分` +
+                `${seconds.toString().padStart(2, '0')}秒` +
+                `.${milliseconds.toString().padStart(2, '0')}`;
+            
+            element.textContent = formattedTime;
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 创建浮动背景元素
+            createFloatingElements();
+            
+            // 立即更新中考倒计时
+            updateCountdown();
+            
+            // 加载额外倒计时
+            loadAdditionalCountdowns();
+            
+            // 设置定时器，每50毫秒更新一次中考倒计时
+            setInterval(updateCountdown, 50);
+        });
+    </script>
+</body>
+</html>
